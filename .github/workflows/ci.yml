@@ -28,6 +28,9 @@ jobs:
       run: |
         docker run -d --name $DEV_CONTAINER -p 8081:80 simple-nginx:dev
 
+    - name: Wait for container to be ready
+      run: sleep 5 # Add this step to wait for Nginx to start.
+
     - name: Test Dev Container
       run: |
         curl -fsS http://localhost:8081 | grep -q "Hello from simple-nginx!" || exit 1
