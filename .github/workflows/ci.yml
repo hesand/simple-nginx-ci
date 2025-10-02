@@ -29,7 +29,7 @@ jobs:
         docker run -d --name $DEV_CONTAINER -p 8081:80 simple-nginx:dev
 
     - name: Wait for container to be ready
-      run: sleep 5 # Add this step to wait for Nginx to start.
+      run: sleep 50 # Add this step to wait for Nginx to start.
 
     - name: Test Dev Container
       run: |
