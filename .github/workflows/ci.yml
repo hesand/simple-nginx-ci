@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DEV_CONTAINER: simple-nginx-dev
+      PROD_CONTAINER: simple-nginx-prod
+      PROD_PORT: 8082
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Build Dev Image
+      run: |
+        docker build -t simple-nginx:dev .
+
+    - name: Start Dev Container
+      run: |
+        docker run -d --name $DEV_CONTAINER -p 8081:80 simple-nginx:dev
+
+    - name: Test Dev Container
+      run: |
+        curl -fsS http://localhost:8081 | grep -q "Hello from simple-nginx!" || exit 1
+
+    - name: Bump Version
+      run: |
+        current_version=$(grep -oP 'version: \K[0-9.]+' index.html)
+        IFS='.' read -r major minor <<< "$current_version"
+        minor=$((minor + 1))
+        new_version="$major.$minor"
+        sed -i "s/version: $current_version/version: $new_version/" index.html
+        echo "New version: $new_version"
+
+    - name: Build Prod Image
+      run: |
+        docker build -t simple-nginx:prod .
+
+    - name: Start Prod Container
+      run: |
+        docker run -d --name $PROD_CONTAINER -p $PROD_PORT:80 simple-nginx:prod
+
+    - name: Test Prod Container
+      run: |
+        curl -fsS http://localhost:$PROD_PORT | grep -q "Hello from simple-nginx!" || exit 1
+
+    - name: Stop Containers
+      run: |
+        docker rm -f $DEV_CONTAINER $PROD_CONTAINER
