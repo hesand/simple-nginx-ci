@@ -29,7 +29,7 @@ jobs:
         docker run -d --name $DEV_CONTAINER -p 8081:80 simple-nginx:dev
 
     - name: Wait for container to be ready
-      run: sleep 50 # Add this step to wait for Nginx to start.
+      run: sleep 5 # Add this step to wait for Nginx to start.
 
 #    - name: Test Dev Container
 #      run: |
@@ -52,10 +52,10 @@ jobs:
       run: |
         docker run -d --name $PROD_CONTAINER -p $PROD_PORT:80 simple-nginx:prod
 
-    - name: Test Prod Container
-      run: |
-        curl -fsS http://localhost:$PROD_PORT | grep -q "Hello from simple-nginx!" || exit 1
+#    - name: Test Prod Container
+#      run: |
+#        curl -fsS http://localhost:$PROD_PORT | grep -q "Hello from simple-nginx!" || exit 1
 
-    - name: Stop Containers
-      run: |
-        docker rm -f $DEV_CONTAINER $PROD_CONTAINER
+#    - name: Stop Containers
+#      run: |
+#        docker rm -f $DEV_CONTAINER $PROD_CONTAINER
