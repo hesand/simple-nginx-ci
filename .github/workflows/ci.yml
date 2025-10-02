@@ -28,12 +28,26 @@ jobs:
       run: |
         docker run -d --name $DEV_CONTAINER -p 8081:80 simple-nginx:dev
 
-    - name: Wait for container to be ready
-      run: sleep 5 # Add this step to wait for Nginx to start.
+    - name: Wait for Dev Container to be ready
+      run: |
+        # Loop for up to 30 seconds
+        timeout=30
+        while [[ $timeout -gt 0 ]]; do
+          if curl -fsS http://localhost:8081; then
+            echo "Container is ready!"
+            exit 0
+          fi
+          echo "Waiting for container... Retrying in 1 second."
+          sleep 1
+          timeout=$((timeout-1))
+        done
+        
+        echo "Timeout reached. Container not ready."
+        exit 1
 
-#    - name: Test Dev Container
-#      run: |
-#        curl -fsS http://localhost:8081 | grep -q "Hello from simple-nginx!" || exit 1
+    - name: Test Dev Container
+      run: |
+        curl -fsS http://localhost:8081 | grep -q "Hello from simple-nginx!" || exit 1
 
     - name: Bump Version
       run: |
@@ -52,10 +66,25 @@ jobs:
       run: |
         docker run -d --name $PROD_CONTAINER -p $PROD_PORT:80 simple-nginx:prod
 
-#    - name: Test Prod Container
-#      run: |
-#        curl -fsS http://localhost:$PROD_PORT | grep -q "Hello from simple-nginx!" || exit 1
+    - name: Wait for Prod Container to be ready
+      run: |
+        timeout=30
+        while [[ $timeout -gt 0 ]]; do
+          if curl -fsS http://localhost:$PROD_PORT; then
+            echo "Prod container is ready!"
+            exit 0
+          fi
+          echo "Waiting for Prod container... Retrying in 1 second."
+          sleep 1
+          timeout=$((timeout-1))
+        done
+        echo "Timeout reached. Prod container not ready."
+        exit 1
 
-#    - name: Stop Containers
-#      run: |
-#        docker rm -f $DEV_CONTAINER $PROD_CONTAINER
+    - name: Test Prod Container
+      run: |
+        curl -fsS http://localhost:$PROD_PORT | grep -q "Hello from simple-nginx!" || exit 1
+
+    - name: Stop Containers
+      run: |
+        docker rm -f $DEV_CONTAINER $PROD_CONTAINER
