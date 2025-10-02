@@ -47,7 +47,7 @@ jobs:
 
     - name: Test Dev Container
       run: |
-        curl -fsS http://localhost:8081 | grep -q "Hello from simple-nginx!" || exit 1
+        curl -fsS http://localhost:8081 | grep -q "God bye from simple-nginx!" || exit 1
 
     - name: Bump Version
       run: |
@@ -83,7 +83,7 @@ jobs:
 
     - name: Test Prod Container
       run: |
-        curl -fsS http://localhost:$PROD_PORT | grep -q "Hello from simple-nginx!" || exit 1
+        curl -fsS http://localhost:$PROD_PORT | grep -q "Good bye from simple-nginx!" || exit 1
 
     - name: Stop Containers
       run: |
